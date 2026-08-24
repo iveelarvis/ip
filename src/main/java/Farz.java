@@ -8,6 +8,12 @@ public class Farz {
                 + "| |_ / _` | '__|_  /\n"
                 + "|  _| (_| | |   / / \n"
                 + "|_|  \\__,_|_|  /___|\n";
-        System.out.println(banner);
+	System.out.println("____________________________________________________________");
+	System.out.println(banner);
+	System.out.println("Hello! I'm Farz.");
+	System.out.println("What can I do for you?");
+	System.out.println("____________________________________________________________");
+	System.out.println("Bye. Hope to see you again soon!");
+	System.out.println("____________________________________________________________");
     }
 }
