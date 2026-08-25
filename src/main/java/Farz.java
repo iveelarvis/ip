@@ -47,7 +47,10 @@ public class Farz {
         case "list" -> listTasks();
         case "mark" -> updateTaskStatus(commandParts[1], true);
         case "unmark" -> updateTaskStatus(commandParts[1], false);
-        default -> addTask(input);
+        case "todo" -> addTodo(commandParts[1]);
+        case "deadline" -> addDeadline(commandParts[1]);
+        case "event" -> addEvent(commandParts[1]);
+        default -> System.out.println("Sorry, I don't understand that command.");
         }
         printDivider();
         return true;
@@ -67,15 +70,38 @@ public class Farz {
     }
 
     private static void listTasks() {
+        System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < taskCount; ++i) {
-            System.out.println((i + 1) + ". " + TASKS[i]);
+            System.out.println((i + 1) + "." + TASKS[i]);
         }
     }
 
-    private static void addTask(String input) {
-        TASKS[taskCount] = new Task(input);
+    private static void addTodo(String description) {
+        storeTask(new Todo(description));
+    }
+
+    private static void addDeadline(String arguments) {
+        String[] parts = arguments.split("\\s+/by\\s+", 2);
+        storeTask(new Deadline(parts[0], parts[1]));
+    }
+
+    private static void addEvent(String arguments) {
+        String[] descriptionAndTimes = arguments.split("\\s+/from\\s+", 2);
+        String[] times = descriptionAndTimes[1].split("\\s+/to\\s+", 2);
+        storeTask(new Event(descriptionAndTimes[0], times[0], times[1]));
+    }
+
+    /**
+     * Stores and acknowledges a newly parsed task.
+     *
+     * @param task Task to add to the in-memory list.
+     */
+    private static void storeTask(Task task) {
+        TASKS[taskCount] = task;
         taskCount++;
-        System.out.println("added: " + input);
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        System.out.println("Now you have " + taskCount + " tasks in the list.");
     }
 
     private static void printDivider() {
