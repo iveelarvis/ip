@@ -59,6 +59,7 @@ public class Farz {
         case "list" -> listTasks();
         case "mark" -> updateTaskStatus(arguments, true);
         case "unmark" -> updateTaskStatus(arguments, false);
+        case "delete" -> deleteTask(arguments);
         case "todo" -> addTodo(arguments);
         case "deadline" -> addDeadline(arguments);
         case "event" -> addEvent(arguments);
@@ -66,6 +67,33 @@ public class Farz {
         }
         printDivider();
         return true;
+    }
+
+    /**
+     * Removes the task identified by its one-based list number.
+     *
+     * @param taskNumber Task number displayed by the {@code list} command.
+     * @throws FarzException If the number is missing, invalid, or outside the task list.
+     */
+    private static void deleteTask(String taskNumber) throws FarzException {
+        if (taskNumber.isEmpty()) {
+            throw new FarzException("Please specify a task number to delete.");
+        }
+
+        final int taskIndex;
+        try {
+            taskIndex = Integer.parseInt(taskNumber) - 1;
+        } catch (NumberFormatException exception) {
+            throw new FarzException("The task number must be a whole number.");
+        }
+        if (taskIndex < 0 || taskIndex >= TASKS.size()) {
+            throw new FarzException("Task " + taskNumber + " is not in your list.");
+        }
+
+        Task removedTask = TASKS.remove(taskIndex);
+        System.out.println("Noted. I've removed this task:");
+        System.out.println("  " + removedTask);
+        System.out.println("Now you have " + TASKS.size() + " tasks in the list.");
     }
 
     private static void updateTaskStatus(String taskNumber, boolean isDone) throws FarzException {

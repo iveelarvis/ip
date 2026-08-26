@@ -12,9 +12,9 @@ This file is the source of truth for scripted console UI tests run with the `tes
 
 ## Test cases
 
-### TC-1: Add, list, and update all task types
+### TC-1: Add, list, update, and delete tasks
 
-**Aim:** Verify that todos, deadlines with free-form dates, and events are stored, displayed, and updated correctly.
+**Aim:** Verify that todos, deadlines with free-form dates, and events are stored, displayed, updated, deleted, and renumbered correctly.
 
 **Input:**
 
@@ -25,6 +25,8 @@ event project meeting /from Mon 2pm /to 4pm
 list
 mark 1
 unmark 1
+delete 2
+list
 bye
 ```
 
@@ -64,6 +66,14 @@ ____________________________________________________________
 OK, I've marked this task as not done yet:
   [T][ ] borrow book
 ____________________________________________________________
+Noted. I've removed this task:
+  [D][ ] do homework (by: no idea :-p)
+Now you have 2 tasks in the list.
+____________________________________________________________
+Here are the tasks in your list:
+1.[T][ ] borrow book
+2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
 Bye. Hope to see you again soon!
 ____________________________________________________________
 ```
@@ -82,6 +92,9 @@ event meeting /from noon
 mark
 mark abc
 mark 1
+delete
+delete abc
+delete 1
 
 bye
 ```
@@ -108,6 +121,12 @@ ____________________________________________________________
 Oops! Use: event DESCRIPTION /from START /to END.
 ____________________________________________________________
 Oops! Please specify a task number to mark.
+____________________________________________________________
+Oops! The task number must be a whole number.
+____________________________________________________________
+Oops! Task 1 is not in your list.
+____________________________________________________________
+Oops! Please specify a task number to delete.
 ____________________________________________________________
 Oops! The task number must be a whole number.
 ____________________________________________________________
