@@ -5,7 +5,7 @@ This file is the source of truth for scripted console UI tests run with the `tes
 ## Test configuration
 
 - Java version: 25
-- Compile command: `javac -d /tmp/farz-ui-classes Farz.java Task.java Todo.java Deadline.java Event.java`
+- Compile command: `javac -d /tmp/farz-ui-classes Farz.java FarzException.java Task.java Todo.java Deadline.java Event.java`
 - Launch command: `java -cp /tmp/farz-ui-classes Farz`
 - Timeout: 10 seconds per test case
 - Comparison: Exact standard-output comparison after normalizing CRLF line endings to LF. Whitespace and blank lines are significant.
@@ -63,6 +63,57 @@ Nice! I've marked this task as done:
 ____________________________________________________________
 OK, I've marked this task as not done yet:
   [T][ ] borrow book
+____________________________________________________________
+Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+### TC-2: Recover from invalid commands
+
+**Aim:** Verify that empty descriptions, unknown commands, malformed task details, invalid task numbers, and blank input produce specific errors without ending the session.
+
+**Input:**
+
+```text
+todo
+blah
+deadline homework
+event meeting /from noon
+mark
+mark abc
+mark 1
+
+bye
+```
+
+**Expected output:**
+
+```text
+____________________________________________________________
+ _____              
+|  ___|_ _ _ __ ____
+| |_ / _` | '__|_  /
+|  _| (_| | |   / / 
+|_|  \__,_|_|  /___|
+
+Hello! I'm Farz.
+What can I do for you?
+____________________________________________________________
+Oops! The description of a todo cannot be empty.
+____________________________________________________________
+Oops! I don't recognise the command 'blah'.
+____________________________________________________________
+Oops! Use: deadline DESCRIPTION /by DATE_OR_TIME.
+____________________________________________________________
+Oops! Use: event DESCRIPTION /from START /to END.
+____________________________________________________________
+Oops! Please specify a task number to mark.
+____________________________________________________________
+Oops! The task number must be a whole number.
+____________________________________________________________
+Oops! Task 1 is not in your list.
+____________________________________________________________
+Oops! Please enter a command.
 ____________________________________________________________
 Bye. Hope to see you again soon!
 ____________________________________________________________

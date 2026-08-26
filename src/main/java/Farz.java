@@ -25,7 +25,12 @@ public class Farz {
         boolean shouldContinue = true;
         while (shouldContinue && scanner.hasNextLine()) {
             String rawInput = scanner.nextLine().trim();
-            shouldContinue = executeCommand(rawInput);
+            try {
+                shouldContinue = executeCommand(rawInput);
+            } catch (FarzException exception) {
+                System.out.println("Oops! " + exception.getMessage());
+                printDivider();
+            }
         }
 
         System.out.println("Bye. Hope to see you again soon!");
@@ -38,26 +43,45 @@ public class Farz {
      * @param input Full user input, including any command arguments.
      * @return {@code false} when the user enters {@code bye}; {@code true} otherwise.
      */
-    private static boolean executeCommand(String input) {
+    private static boolean executeCommand(String input) throws FarzException {
+        if (input.isEmpty()) {
+            throw new FarzException("Please enter a command.");
+        }
+
         String[] commandParts = input.split("\\s+", 2);
-        switch (commandParts[0]) {
+        String command = commandParts[0];
+        String arguments = commandParts.length == 2 ? commandParts[1].trim() : "";
+        switch (command) {
         case "bye" -> {
             return false;
         }
         case "list" -> listTasks();
-        case "mark" -> updateTaskStatus(commandParts[1], true);
-        case "unmark" -> updateTaskStatus(commandParts[1], false);
-        case "todo" -> addTodo(commandParts[1]);
-        case "deadline" -> addDeadline(commandParts[1]);
-        case "event" -> addEvent(commandParts[1]);
-        default -> System.out.println("Sorry, I don't understand that command.");
+        case "mark" -> updateTaskStatus(arguments, true);
+        case "unmark" -> updateTaskStatus(arguments, false);
+        case "todo" -> addTodo(arguments);
+        case "deadline" -> addDeadline(arguments);
+        case "event" -> addEvent(arguments);
+        default -> throw new FarzException("I don't recognise the command '" + command + "'.");
         }
         printDivider();
         return true;
     }
 
-    private static void updateTaskStatus(String taskNumber, boolean isDone) {
-        int taskIndex = Integer.parseInt(taskNumber) - 1;
+    private static void updateTaskStatus(String taskNumber, boolean isDone) throws FarzException {
+        if (taskNumber.isEmpty()) {
+            throw new FarzException("Please specify a task number to "
+                    + (isDone ? "mark" : "unmark") + ".");
+        }
+
+        final int taskIndex;
+        try {
+            taskIndex = Integer.parseInt(taskNumber) - 1;
+        } catch (NumberFormatException exception) {
+            throw new FarzException("The task number must be a whole number.");
+        }
+        if (taskIndex < 0 || taskIndex >= taskCount) {
+            throw new FarzException("Task " + taskNumber + " is not in your list.");
+        }
         Task task = TASKS[taskIndex];
         if (isDone) {
             task.markAsDone();
@@ -76,19 +100,42 @@ public class Farz {
         }
     }
 
-    private static void addTodo(String description) {
+    private static void addTodo(String description) throws FarzException {
+        requireDescription(description, "todo");
         storeTask(new Todo(description));
     }
 
-    private static void addDeadline(String arguments) {
+    private static void addDeadline(String arguments) throws FarzException {
         String[] parts = arguments.split("\\s+/by\\s+", 2);
+        if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
+            throw new FarzException("Use: deadline DESCRIPTION /by DATE_OR_TIME.");
+        }
         storeTask(new Deadline(parts[0], parts[1]));
     }
 
-    private static void addEvent(String arguments) {
+    private static void addEvent(String arguments) throws FarzException {
         String[] descriptionAndTimes = arguments.split("\\s+/from\\s+", 2);
+        if (descriptionAndTimes.length < 2 || descriptionAndTimes[0].isBlank()) {
+            throw new FarzException("Use: event DESCRIPTION /from START /to END.");
+        }
         String[] times = descriptionAndTimes[1].split("\\s+/to\\s+", 2);
+        if (times.length < 2 || times[0].isBlank() || times[1].isBlank()) {
+            throw new FarzException("Use: event DESCRIPTION /from START /to END.");
+        }
         storeTask(new Event(descriptionAndTimes[0], times[0], times[1]));
+    }
+
+    /**
+     * Ensures that a task command includes a non-empty description.
+     *
+     * @param description Task description supplied by the user.
+     * @param taskType Type of task being created, used in the error message.
+     * @throws FarzException If the description is empty.
+     */
+    private static void requireDescription(String description, String taskType) throws FarzException {
+        if (description.isBlank()) {
+            throw new FarzException("The description of a " + taskType + " cannot be empty.");
+        }
     }
 
     /**
@@ -96,7 +143,10 @@ public class Farz {
      *
      * @param task Task to add to the in-memory list.
      */
-    private static void storeTask(Task task) {
+    private static void storeTask(Task task) throws FarzException {
+        if (taskCount == TASKS.length) {
+            throw new FarzException("Your task list is full; remove a task before adding another.");
+        }
         TASKS[taskCount] = task;
         taskCount++;
         System.out.println("Got it. I've added this task:");
