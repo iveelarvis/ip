@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -10,8 +11,8 @@ public class Farz {
             + "| |_ / _` | '__|_  /\n"
             + "|  _| (_| | |   / / \n"
             + "|_|  \\__,_|_|  /___|\n";
-    private static final Task[] TASKS = new Task[100];
-    private static int taskCount = 0;
+    /** Tasks stored for the current application session. */
+    private static final ArrayList<Task> TASKS = new ArrayList<>();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -79,10 +80,10 @@ public class Farz {
         } catch (NumberFormatException exception) {
             throw new FarzException("The task number must be a whole number.");
         }
-        if (taskIndex < 0 || taskIndex >= taskCount) {
+        if (taskIndex < 0 || taskIndex >= TASKS.size()) {
             throw new FarzException("Task " + taskNumber + " is not in your list.");
         }
-        Task task = TASKS[taskIndex];
+        Task task = TASKS.get(taskIndex);
         if (isDone) {
             task.markAsDone();
             System.out.println("Nice! I've marked this task as done:");
@@ -95,8 +96,8 @@ public class Farz {
 
     private static void listTasks() {
         System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < taskCount; ++i) {
-            System.out.println((i + 1) + "." + TASKS[i]);
+        for (int i = 0; i < TASKS.size(); ++i) {
+            System.out.println((i + 1) + "." + TASKS.get(i));
         }
     }
 
@@ -143,15 +144,11 @@ public class Farz {
      *
      * @param task Task to add to the in-memory list.
      */
-    private static void storeTask(Task task) throws FarzException {
-        if (taskCount == TASKS.length) {
-            throw new FarzException("Your task list is full; remove a task before adding another.");
-        }
-        TASKS[taskCount] = task;
-        taskCount++;
+    private static void storeTask(Task task) {
+        TASKS.add(task);
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+        System.out.println("Now you have " + TASKS.size() + " tasks in the list.");
     }
 
     private static void printDivider() {
